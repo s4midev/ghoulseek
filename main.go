@@ -34,24 +34,14 @@ func getTest() {
 	}
 
 	fmt.Println(test)
+
+	library.WriteArtistFile(test)
 }
 
 func main() {
-	search, err := slsk.StartSearch("tyler the creator flower boy")
+	library, _ := library.ReadLibrary()
 
-	if err != nil {
-		fmt.Println("Failed to search slskd: " + color.RedString(err.Error()))
-		return
-	}
+	result, _ := slsk.ReleaseSearch(library[0].Releases[0])
 
-	fmt.Println("Successfully searched: " + color.GreenString(search.SearchId))
-
-	results, err := slsk.GetResponses(search.SearchId)
-
-	if err != nil {
-		fmt.Println("Failed to get search responses: " + color.RedString(err.Error()))
-		return
-	}
-
-	fmt.Println(results[0])
+	fmt.Println(result)
 }

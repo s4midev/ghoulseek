@@ -9,7 +9,7 @@ import (
 	"github.com/fatih/color"
 )
 
-func GetArtistReleases(id string) ([]metadata.Release, error) {
+func GetArtistReleases(id string, artistName string) ([]metadata.Release, error) {
 	url := "https://musicbrainz.org/ws/2/release-group/?artist=" + id + "&fmt=json"
 
 	resp, err := http.Get(url)
@@ -36,6 +36,7 @@ func GetArtistReleases(id string) ([]metadata.Release, error) {
 			Tracks:        []metadata.Track{},
 			MusicBrainzId: r.ID,
 			ReleaseType:   r.PrimaryType,
+			ArtistName:    artistName,
 		})
 	}
 
@@ -71,7 +72,7 @@ func GetArtistFull(id string) (metadata.Artist, error) {
 		return metadata.Artist{}, err
 	}
 
-	artistReleases, err := GetArtistReleases(id)
+	artistReleases, err := GetArtistReleases(id, artistData.Name)
 
 	if err != nil {
 		fmt.Println("Error getting releases for " + color.YellowString(id) + ": " + color.RedString(err.Error()))

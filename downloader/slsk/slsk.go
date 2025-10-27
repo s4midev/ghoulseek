@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"ghoulseek/globals"
+	"ghoulseek/metadata"
 	"log"
 	"net/http"
 	"net/url"
@@ -183,5 +184,35 @@ func GetResponses(id string) ([]SearchResponses, error) {
 		return []SearchResponses{}, err
 	}
 
+	if len(result) < 100 {
+		return result, nil
+	}
+
 	return result[0:100], nil
+}
+
+func FullSearch(query string) ([]SearchResponses, error) {
+	search, err := StartSearch(query)
+
+	if err != nil {
+		fmt.Println("Failed to search slskd: " + color.RedString(err.Error()))
+		return []SearchResponses{}, err
+	}
+
+	fmt.Println("Successfully searched: " + color.GreenString(search.SearchId))
+
+	results, err := GetResponses(search.SearchId)
+
+	if err != nil {
+		fmt.Println("Failed to get search responses: " + color.RedString(err.Error()))
+		return []SearchResponses{}, err
+	}
+
+	return results, nil
+}
+
+func ReleaseSearch(release metadata.Release) ([]SearchResponses, error) {
+	result, err := FullSearch(release.ArtistName + " - " + release.Title)
+
+	return result, err
 }

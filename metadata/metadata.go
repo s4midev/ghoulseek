@@ -13,6 +13,7 @@ type Release struct {
 	MusicBrainzId string  `json:"musicBrainzId"`
 	// album, ep, single
 	ReleaseType string `json:"releaseType"`
+	ArtistName  string `json:"artistName"`
 }
 
 type Artist struct {
