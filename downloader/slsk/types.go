@@ -12,10 +12,19 @@ type SearchResponse struct {
 	IsComplete bool    `json:"isComplete"`
 }
 
+type File struct {
+	BitDepth   int    `json:"bitDepth"`
+	Extension  string `json:"extension"`
+	FileName   string `json:"filename"`
+	Length     int    `json:"length"`
+	SampleRate int    `json:"sampleRate"`
+	Size       int    `json:"size"`
+	IsLocked   bool   `json:"isLocked"`
+}
 type SearchResponses struct {
-	FileCount         int           `json:"fileCount"`
-	Files             []interface{} `json:"files"`
-	HasFreeUploadSlot bool          `json:"hasFreeUploadSlot"`
-	UploadSpeed       int64         `json:"uploadSpeed"`
-	Username          string        `json:"username"`
+	FileCount         int    `json:"fileCount"`
+	Files             []File `json:"files"`
+	HasFreeUploadSlot bool   `json:"hasFreeUploadSlot"`
+	UploadSpeed       int64  `json:"uploadSpeed"`
+	Username          string `json:"username"`
 }

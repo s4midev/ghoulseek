@@ -44,5 +44,17 @@ func main() {
 
 	result, _ := slsk.ReleaseSearch(library[0].Releases[0])
 
-	fmt.Println(result[0])
+	bestRelease := []slsk.File{}
+	var bestScore float64 = -99
+
+	for _, r := range result {
+		score := slsk.EvaluateFileList(r.Files)
+
+		if score > float64(bestScore) {
+			bestRelease = r.Files
+			bestScore = score
+		}
+	}
+
+	fmt.Println(bestRelease)
 }
