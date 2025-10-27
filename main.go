@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"ghoulseek/downloader/slsk"
 	"ghoulseek/library"
 	"ghoulseek/musicbrainz"
 
@@ -35,6 +36,10 @@ func getTest() {
 	fmt.Println(test)
 }
 
+func addSearchTest() {
+	slsk.StartSearch("billie eilish")
+}
+
 func main() {
-	scanTest()
+	addSearchTest()
 }
