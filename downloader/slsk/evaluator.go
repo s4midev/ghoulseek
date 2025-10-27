@@ -17,6 +17,8 @@ func EvaluateFile(file File) int {
 
 	if file.Extension == "flac" {
 		score += 1
+	} else if file.Extension == "mp3" {
+		score -= 1
 	}
 
 	return score
