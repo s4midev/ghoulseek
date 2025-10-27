@@ -37,5 +37,24 @@ func EvaluateFileList(files []File) float64 {
 		sum += s
 	}
 
-	return float64(sum / len(scoreList))
+	return float64(float64(sum) / float64(len(scoreList)))
+}
+
+// returns host name too
+func GetBestFileList(releases []SearchResponses) ([]File, string) {
+	bestRelease := []File{}
+	var bestScore float64 = -99
+	bestReleaseHost := ""
+
+	for _, r := range releases {
+		score := EvaluateFileList(r.Files)
+
+		if score > float64(bestScore) {
+			bestRelease = r.Files
+			bestScore = score
+			bestReleaseHost = r.Username
+		}
+	}
+
+	return bestRelease, bestReleaseHost
 }

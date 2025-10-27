@@ -49,7 +49,7 @@ func StartSearch(query string) (SearchResponse, error) {
 
 	// i have to manually delay.. the horrors
 
-	time.Sleep(2 * time.Second)
+	time.Sleep(6 * time.Second)
 	return result, nil
 }
 

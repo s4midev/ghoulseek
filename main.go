@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"ghoulseek/downloader"
 	"ghoulseek/downloader/slsk"
 	"ghoulseek/library"
 	"ghoulseek/musicbrainz"
@@ -42,19 +43,16 @@ func main() {
 
 	library, _ := library.ReadLibrary()
 
-	result, _ := slsk.ReleaseSearch(library[0].Releases[0])
+	result, _ := slsk.ReleaseSearch(library[0].Releases[4])
 
-	bestRelease := []slsk.File{}
-	var bestScore float64 = -99
-
-	for _, r := range result {
-		score := slsk.EvaluateFileList(r.Files)
-
-		if score > float64(bestScore) {
-			bestRelease = r.Files
-			bestScore = score
-		}
+	if len(result) == 0 {
+		fmt.Println(color.RedString("No results found!"))
+		return
 	}
 
-	fmt.Println(bestRelease)
+	best, host := slsk.GetBestFileList(result)
+
+	downloader.StartDownload(best, host)
+
+	downloader.WaitForDownloadFinish(best, host)
 }

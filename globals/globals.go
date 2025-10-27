@@ -9,3 +9,4 @@ var ArtistFile string = ".ghoulartist"
 // i will need to merge these at some point
 var SlskdEndpoint string = "http://192.168.0.85:5030/api/v0"
 var SlskdIp string = "192.168.0.85:5030"
+var SlskDownloadDir = "/run/media/sami/storage/Software/Docker/slskd/slskd/downloads"

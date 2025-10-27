@@ -4,8 +4,8 @@
 warning: very work in progress  
 
 rough to do:
-- slskd downloader
-- file renamer/mover
+- slskd downloader (complete)
+- file renamer/mover (current)
 - uniform metadata writer
 - data writer for already existing libraries
 - docker
