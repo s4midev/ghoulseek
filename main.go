@@ -20,7 +20,7 @@ func scanTest() {
 	fmt.Println(libraryScan)
 }
 
-var testId string = "4e2b6413-ebc1-4ade-bca7-6d078e476c97"
+var testId string = "f6beac20-5dfe-4d1f-ae02-0b0a740aafd6"
 
 func getTest() {
 
@@ -39,9 +39,10 @@ func getTest() {
 }
 
 func main() {
+
 	library, _ := library.ReadLibrary()
 
 	result, _ := slsk.ReleaseSearch(library[0].Releases[0])
 
-	fmt.Println(result)
+	fmt.Println(result[0])
 }

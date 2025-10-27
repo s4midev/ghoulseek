@@ -6,18 +6,11 @@ import (
 	"fmt"
 	"ghoulseek/globals"
 	"ghoulseek/metadata"
-	"log"
 	"net/http"
-	"net/url"
 	"strings"
+	"time"
 
 	"github.com/fatih/color"
-	"github.com/gorilla/websocket"
-)
-
-var (
-	socket        *websocket.Conn
-	SocketRunning bool
 )
 
 type WsMessage struct {
@@ -26,102 +19,33 @@ type WsMessage struct {
 	Arguments []SearchResponse `json:"arguments"`
 }
 
-func InitSocket() {
-	if SocketRunning {
-		return
-	}
-
-	u := url.URL{Scheme: "ws", Host: globals.SlskdIp, Path: "/hub/search"}
-	conn, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
-	if err != nil {
-		log.Fatal("dial:", err)
-	}
-	socket = conn
-	SocketRunning = true
-
-	go func() {
-		defer func() {
-			SocketRunning = false
-			if socket != nil {
-				socket.Close()
-			}
-		}()
-
-		for {
-			_, msg, err := socket.ReadMessage()
-			if err != nil {
-				if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway) ||
-					strings.Contains(err.Error(), "use of closed network connection") {
-					log.Println("socket closed")
-					return
-				}
-				log.Println("read error:", err)
-				return
-			}
-
-			if strings.Contains(string(msg), "\x1e") {
-				continue
-			}
-
-			parseMessage := WsMessage{}
-			if err := json.Unmarshal(msg, &parseMessage); err != nil {
-				log.Println("failed to unmarshal ws message:", err, "raw:", string(msg))
-				continue
-			}
-
-			if err := json.Unmarshal(msg, &parseMessage); err != nil {
-				log.Println("failed to unmarshal ws message:", err, "raw:", string(msg))
-				continue
-			}
-		}
-	}()
+type Session struct {
+	ConnectionId    string `json:"connectionId"`
+	ConnectionToken string `json:"connectionToken"`
 }
 
-// this is the worst piece of code i have ever written. but it works. so. you know.
-func WaitForMessage(checker func(WsMessage) bool) bool {
-	if !SocketRunning {
-		log.Println("socket is not running")
-		return false
+func NegotiateSession() Session {
+	resp, err := http.Post(globals.SlskdBase+"hub/search/negotiate?negotiateVersion=1", "application/json", strings.NewReader(""))
+	if err != nil {
+		fmt.Println(err.Error())
+		return Session{}
+	}
+	defer resp.Body.Close()
+
+	var result Session
+
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		fmt.Println(err.Error())
+		return Session{}
 	}
 
-	resultCh := make(chan bool)
-
-	go func() {
-		for {
-			_, msg, err := socket.ReadMessage()
-			if err != nil {
-				if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway) ||
-					strings.Contains(err.Error(), "use of closed network connection") {
-					fmt.Println("socket closed")
-					resultCh <- false
-					return
-				}
-				resultCh <- false
-				return
-			}
-
-			parseMessage := WsMessage{}
-			if err := json.Unmarshal(msg, &parseMessage); err != nil {
-				fmt.Println(err.Error())
-				continue
-			}
-
-			if checker(parseMessage) {
-				resultCh <- true
-				return
-			}
-		}
-	}()
-
-	return <-resultCh
+	fmt.Println("negotiated session")
+	fmt.Println(result)
+	return result
 }
 
 func StartSearch(query string) (SearchResponse, error) {
-	if SocketRunning == false {
-		InitSocket()
-	}
-
-	url := globals.SlskdEndpoint + "/searches"
+	urlToUse := globals.SlskdEndpoint + "/searches"
 
 	paramData := struct {
 		SearchText string `json:"searchText"`
@@ -129,46 +53,33 @@ func StartSearch(query string) (SearchResponse, error) {
 		SearchText: query,
 	}
 
-	// no need to handle err, it will never fail
 	encode, _ := json.Marshal(paramData)
 
-	resp, err := http.Post(url, "application/json", bytes.NewReader(encode))
-
+	resp, err := http.Post(urlToUse, "application/json", bytes.NewReader(encode))
 	if err != nil {
 		fmt.Println(err.Error())
 		return SearchResponse{}, err
 	}
-
 	defer resp.Body.Close()
 
 	var result SearchResponse
-
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		fmt.Println(err.Error())
 		return SearchResponse{}, err
 	}
 
-	fmt.Println("Created search request: " + color.GreenString(result.SearchId))
+	// i have to manually delay.. the horrors
 
-	ok := WaitForMessage(func(wm WsMessage) bool {
-		return wm.Arguments[0].IsComplete && wm.Arguments[0].SearchId == result.SearchId
-	})
-
-	if !ok {
-		fmt.Println(color.RedString("oh well, we'll probably be fine"))
-	}
-
+	time.Sleep(2 * time.Second)
 	return result, nil
 }
 
 func GetResponses(id string) ([]SearchResponses, error) {
-	if SocketRunning == false {
-		InitSocket()
-	}
-
 	url := globals.SlskdEndpoint + "/searches/" + id + "/responses"
 
 	resp, err := http.Get(url)
+
+	fmt.Println(resp.Status)
 
 	if err != nil {
 		fmt.Println(err.Error())
