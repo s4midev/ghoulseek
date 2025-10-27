@@ -7,7 +7,6 @@ import (
 	"ghoulseek/globals"
 	"ghoulseek/metadata"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/fatih/color"
@@ -22,26 +21,6 @@ type WsMessage struct {
 type Session struct {
 	ConnectionId    string `json:"connectionId"`
 	ConnectionToken string `json:"connectionToken"`
-}
-
-func NegotiateSession() Session {
-	resp, err := http.Post(globals.SlskdBase+"hub/search/negotiate?negotiateVersion=1", "application/json", strings.NewReader(""))
-	if err != nil {
-		fmt.Println(err.Error())
-		return Session{}
-	}
-	defer resp.Body.Close()
-
-	var result Session
-
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		fmt.Println(err.Error())
-		return Session{}
-	}
-
-	fmt.Println("negotiated session")
-	fmt.Println(result)
-	return result
 }
 
 func StartSearch(query string) (SearchResponse, error) {
