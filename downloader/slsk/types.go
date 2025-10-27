@@ -8,7 +8,8 @@ type SearchResponse struct {
 	Responses  []interface{} `json:"responses"`
 	SearchText string        `json:"searchText"`
 	// is this used for anything ??
-	Token float64 `json:"token"`
+	Token      float64 `json:"token"`
+	IsComplete bool    `json:"isComplete"`
 }
 
 type SearchResponses struct {

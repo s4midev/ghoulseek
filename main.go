@@ -36,10 +36,22 @@ func getTest() {
 	fmt.Println(test)
 }
 
-func addSearchTest() {
-	slsk.StartSearch("billie eilish")
-}
-
 func main() {
-	addSearchTest()
+	search, err := slsk.StartSearch("tyler the creator flower boy")
+
+	if err != nil {
+		fmt.Println("Failed to search slskd: " + color.RedString(err.Error()))
+		return
+	}
+
+	fmt.Println("Successfully searched: " + color.GreenString(search.SearchId))
+
+	results, err := slsk.GetResponses(search.SearchId)
+
+	if err != nil {
+		fmt.Println("Failed to get search responses: " + color.RedString(err.Error()))
+		return
+	}
+
+	fmt.Println(results[0])
 }
